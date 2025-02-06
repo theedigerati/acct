@@ -1,3 +1,4 @@
+import dj_database_url
 from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
@@ -60,8 +61,7 @@ TENANT_APPS = [
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
-    "django_tenants.middleware.TenantSubfolderMiddleware",
-    # "django_tenants.middleware.main.TenantMainMiddleware",
+    "django_tenants.middleware.main.TenantMainMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -96,16 +96,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django_tenants.postgresql_backend",
-        "NAME": config("DB_NAME", default="test_db"),
-        "USER": config("DB_USER", default="postgres"),
-        "PASSWORD": config("DB_PASSWORD", default="postgres"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": "5432",
-        "OPTIONS": {"sslmode": config("SSL_MODE", default="disable")},
-    }
+    "default": dj_database_url.parse(
+        config("DATABASE_URL", default="postgres://postgres:password@localhost:5432/acc"),
+        engine="django_tenants.postgresql_backend",
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=config("SSL_REQUIRE", default=False, cast=bool),
+    )
 }
 
 
@@ -166,7 +165,6 @@ MANAGER_USER_RESTRICTIONS = [
 # Multinants settings
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="localhost")
-TENANT_SUBFOLDER_PREFIX = "org"
 TENANT_MODEL = "organisation.Tenant"
 TENANT_DOMAIN_MODEL = "organisation.Domain"
 BASE_TENANT_SLUG = config("BASE_TENANT_SLUG", default="acme")
@@ -200,7 +198,6 @@ SPECTACULAR_SETTINGS = {
     },
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
-    "SCHEMA_PATH_PREFIX_INSERT": f"/{TENANT_SUBFOLDER_PREFIX}/default",
 }
 
 PERMISSION_CATEGORIES = {
