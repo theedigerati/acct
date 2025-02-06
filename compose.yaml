@@ -8,10 +8,8 @@ services:
     env_file:
       - ./.env
     environment:
-      - POSTGRES_HOST=${DB_HOST:?}
-      - POSTGRES_USER=${DB_USER:?}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:?}
-      - POSTGRES_NAME=${DB_NAME:?}
+      - POSTGRES_USER=acc
+      - POSTGRES_PASSWORD=acc
 
   api:
     networks:
@@ -43,7 +41,6 @@ services:
       - CELERY_BROKER=${REDIS_URL:?}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:?}
     depends_on:
-      - api
       - redis
 
   redis:

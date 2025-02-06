@@ -18,11 +18,13 @@ WORKDIR /code
 RUN pip install poetry
 COPY pyproject.toml poetry.lock /code/
 RUN poetry config virtualenvs.create false
-RUN poetry install --only main --no-root --no-interaction
+RUN poetry install --no-root --no-interaction
+# RUN --mount=type=cache,mode=0755,target=/root/.cache/pypoetry poetry sync
 COPY . /code
 
+RUN groupadd -r acc && useradd -r -g acc acc
 RUN chmod +x /code/init.sh
-# RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
