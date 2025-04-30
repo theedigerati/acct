@@ -57,7 +57,7 @@ To support multi-tenancy, each tenant is available via a custom subdomain, for e
 
 On a typical local machine, accessing subdomains would require manually adding entries to `/etc/hosts`. To streamline this, we use:
 - [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) as a DNS resolver for a custom local domain with wildcard subdomain support.
-- [nginx](https://nginx.org/) as a reverse proxy to serve the application on port `80`.
+- [Nginx](https://nginx.org/) as a reverse proxy to serve the application on port `80`.
 
 This setup allows seamless routing to tenant-specific domains without additional system configuration.
 
@@ -67,4 +67,4 @@ This setup allows seamless routing to tenant-specific domains without additional
 - Tenant API - http://acme.acct
 - OpenAPI Docs - http://acme.acct/docs
 
-Sub-domain slug can be edited for any organisation(tenant).
+Sub-domain slug can be customised for any organisation(tenant).
