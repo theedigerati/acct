@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from django_tenants.utils import schema_context
-from apps.department.models import Department
+from apps.team.models import Team
 from core.permissions import BelongsToOrganisation
 from .models import User
 from .serializers import (
@@ -177,7 +177,7 @@ class UserViewSet(ModelViewSet):
 
 
 class PermissionSourceOfTruthPermissions(DjangoModelPermissions):
-    perms_map = {"GET": ["user.change_user", "department.change_department"]}
+    perms_map = {"GET": ["user.change_user", "team.change_team"]}
 
 
 class PermissionViewSet(ModelViewSet):
@@ -201,13 +201,13 @@ class PermissionViewSet(ModelViewSet):
         categories in `settings.PERMISSION_CATEGORIES`.
 
         Add an `active` bool flag on each permissions indicating that a
-        user or department has been assigned the permission.
+        user or team has been assigned the permission.
 
         Add an `inherited` bool flag on each permissions indicating that
-        a user has inherited the permission from a department. Default will
-        be false for all departments.
+        a user has inherited the permission from a team. Default will
+        be false for all teams.
 
-        If user or department id value is not provided in request query params,
+        If user or team id value is not provided in request query params,
         `active` & `inherited` flags will be false.
 
         e.g:
@@ -243,14 +243,14 @@ class PermissionViewSet(ModelViewSet):
 
     def _get_perm_data(self, request, perm):
         user_id = request.query_params.get("user", 0)
-        dept_id = request.query_params.get("department", 0)
+        team_id = request.query_params.get("team", 0)
         user_object = None
-        dept_object = None
+        team_object = None
 
         with contextlib.suppress(User.DoesNotExist):
             user_object = User.objects.get(id=int(user_id))
-        with contextlib.suppress(Department.DoesNotExist):
-            dept_object = Department.objects.get(id=int(dept_id))
+        with contextlib.suppress(Team.DoesNotExist):
+            team_object = Team.objects.get(id=int(team_id))
 
         perm_dict = {"id": perm.id, "name": perm.name, "codename": perm.codename}
 
@@ -262,10 +262,10 @@ class PermissionViewSet(ModelViewSet):
                 "inherited": perm_string in user_object.get_group_permissions(),
             }
 
-        if dept_object:
+        if team_object:
             return {
                 "perm": perm_dict,
-                "active": dept_object.permissions.filter(id=perm.id).exists(),
+                "active": team_object.permissions.filter(id=perm.id).exists(),
                 "inherited": False,
             }
 
