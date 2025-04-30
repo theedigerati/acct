@@ -146,8 +146,8 @@ class UserViewSet(ModelViewSet):
 
         if (
             (request.user.is_employee and role != User.EMPLOYEE)
-            or (request.user.is_admin and role == User.META)
-            or (request.user.is_manager and role in [User.ADMIN, User.META])
+            or (request.user.is_admin and role == User.OWNER)
+            or (request.user.is_manager and role in [User.ADMIN, User.OWNER])
         ):
             return False
 
@@ -159,7 +159,7 @@ class UserViewSet(ModelViewSet):
         """
         if (
             (request.user.is_employee and user.is_manager_or_more)
-            or (request.user.is_admin and user.is_meta)
+            or (request.user.is_admin and user.is_owner)
             or (request.user.is_manager and user.is_admin_or_more)
         ):
             return False

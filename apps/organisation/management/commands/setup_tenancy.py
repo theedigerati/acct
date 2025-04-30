@@ -29,10 +29,10 @@ class Command(BaseCommand):
                 public_owner,
                 is_staff=True,
                 is_superuser=True,
-                first_name="Meta",
-                last_name="User",
-                role=User.META,
-                password="password",
+                first_name="John",
+                last_name="Smith",
+                role=User.OWNER,
+                password="owner",
             )
             self.stdout.write(
                 f"Public tenant created with {domain} as domain and {public_owner} as owner"

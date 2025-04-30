@@ -15,15 +15,14 @@ class User(UserProfile):
       restricted for admin access
     - Admin user. Has all manager access with special administrative
       specifications.
-    - Meta user. Has all access. Is django superuser.
+    - Owner user. Has all access. Is django superuser.
 
     All users can belong to multiple organisations.
-
     """
 
-    META, ADMIN, MANAGER, EMPLOYEE = "meta", "admin", "manager", "employee"
+    OWNER, ADMIN, MANAGER, EMPLOYEE = "owner", "admin", "manager", "employee"
     ROLE_CHOICES = (
-        (META, _("Meta user role")),
+        (OWNER, _("Owner user role")),
         (ADMIN, _("Admin user role")),
         (MANAGER, _("Manager user role")),
         (EMPLOYEE, _("Employee user role")),
@@ -62,27 +61,21 @@ class User(UserProfile):
         return self.role == self.ADMIN
 
     @property
-    def is_meta(self) -> bool:
-        return self.role == self.META
+    def is_owner(self) -> bool:
+        return self.role == self.OWNER
 
     @property
     def is_manager_or_more(self) -> bool:
-        return (
-            self.role == self.MANAGER
-            or self.role == self.ADMIN
-            or self.role == self.META
-        )
+        return self.role == self.MANAGER or self.role == self.ADMIN or self.role == self.OWNER
 
     @property
     def is_admin_or_more(self) -> bool:
-        return self.role == self.ADMIN or self.role == self.META
+        return self.role == self.ADMIN or self.role == self.OWNER
 
     @property
     def full_name(self) -> str:
         return (
-            self.first_name
-            + (" " if self.first_name and self.last_name else "")
-            + self.last_name
+            self.first_name + (" " if self.first_name and self.last_name else "") + self.last_name
         )
 
     def assign_default_permissions(self):
@@ -92,7 +85,7 @@ class User(UserProfile):
     def get_role_default_permissions(self, _role=None):
         perms = Permission.objects.filter(id__in=[])
         role = _role or self.role
-        if role == self.META:
+        if role == self.OWNER:
             perms = Permission.objects.all()
         if role == self.ADMIN:
             restrictions = settings.ADMIN_USER_RESTRICTIONS
