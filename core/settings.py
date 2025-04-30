@@ -168,7 +168,7 @@ TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="acct")
 TENANT_MODEL = "organisation.Tenant"
 TENANT_DOMAIN_MODEL = "organisation.Domain"
 BASE_TENANT_SLUG = config("BASE_TENANT_SLUG", default="acme")
-BASE_TENANT_OWNER_EMAIL = config("BASE_TENANT_OWNER_EMAIL", default="meta@localhost")
+BASE_TENANT_OWNER_EMAIL = config("BASE_TENANT_OWNER_EMAIL", default="owner@acct")
 
 AUTHENTICATION_BACKENDS = ("tenant_users.permissions.backend.UserBackend",)
 
@@ -191,7 +191,7 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "acct",
+    "TITLE": "Acct",
     "DESCRIPTION": "Double-entry accounting REST API.",
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
