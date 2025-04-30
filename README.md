@@ -28,7 +28,7 @@ git clone https://github.com/theedigerati/acct.git && cd acct
 Run database migrations to set up the initial schema:
 
 ```sh
-docker compose run --rm python manage.py migrate
+docker compose run --rm api python manage.py migrate
 ```
 
 **3. Set Up Tenancy Data**
@@ -36,7 +36,7 @@ docker compose run --rm python manage.py migrate
 This will initialize a default tenant, create a basic chart of accounts, and provision the system owner.
 
 ```sh
-docker compose run --rm python manage.py setup_tenancy
+docker compose run --rm api python manage.py setup_tenancy
 ```
 > ✅ A superuser account is created automatically with:  
 > **Email:** `owner@acct`  
@@ -51,15 +51,24 @@ docker compose up
 
 ## Accessing the Application
 
-To support multi-tenancy, each tenant is available via a custom subdomain, for example: `tenant1.example.com`.
+To support multi-tenancy, each organisation(tenant) is available via a custom subdomain, for example: `tenant1.example.com`.
 
 ### Local Development Setup
 
-On a typical local machine, accessing subdomains would require manually adding entries to `/etc/hosts`. To streamline this, we use:
-- [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) as a DNS resolver for a custom local domain with wildcard subdomain support.
+To avoid manually adding each subdomain to `/etc/hosts`, this project uses:
+- [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) as a DNS resolver for custom local domain with wildcard subdomain (i.e. `*.acct`).
 - [Nginx](https://nginx.org/) as a reverse proxy to serve the application on port `80`.
 
-This setup allows seamless routing to tenant-specific domains without additional system configuration.
+These tools have been configured as docker services and should already be running after installation step 4. The only thing left to do, is to add the `resolver` configuration for our custom domain in `/etc/resolver/` (for linux/mac).
+
+```sh
+sudo mkdir /etc/resolver
+sudo sh -c 'echo "nameserver 127.0.0.1" >> /etc/resolver/acct'
+```
+
+Basically, we're telling our host machine to search the nameserver on our localhost on port `53`, where our dnsmasq container is running.
+
+This setup enables seamless access to subdomain-based tenants during local development.
 
 ### Accessing URLs
 
