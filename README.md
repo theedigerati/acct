@@ -62,5 +62,7 @@ This setup allows seamless routing to tenant-specific domains without additional
 ### Accessing URLs
 
 - Public API - http://acct
-- Default Tenant API - http://default.acct
-- OpenAPI Docs - http://default.acct/docs
+- Tenant API - http://acme.acct
+- OpenAPI Docs - http://acme.acct/docs
+
+Sub-domain slug can be edited for any organisation(tenant).
