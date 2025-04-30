@@ -21,8 +21,8 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-root --no-interaction
 # RUN --mount=type=cache,mode=0755,target=/root/.cache/pypoetry poetry sync
 
-RUN groupadd -r acc && useradd -r -g acc acc
-RUN chown -R acc:acc /app/
+RUN groupadd -r acct && useradd -r -g acct acct
+RUN chown -R acct:acct /app/
 COPY . /app
 
 RUN chmod +x /app/init.sh

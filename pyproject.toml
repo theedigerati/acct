@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "acc"
+name = "acct"
 version = "0.1.0"
 description = "Double-entry Accounting REST API"
 authors = ["Posi Adedeji <posiadedeji05@gmail.com>"]

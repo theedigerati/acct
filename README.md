@@ -1,4 +1,4 @@
-## acc
+## acct
 
 This is a simple accounting REST API. Manage invoices, bills, expenses, acccounting books & reports.
 
@@ -16,7 +16,7 @@ This is a simple accounting REST API. Manage invoices, bills, expenses, acccount
 First, clone the repo
 
 ```
-git clone https://github.com/theedigerati/acc.git && cd acc
+git clone https://github.com/theedigerati/acct.git && cd acct
 ```
 
 Next, run

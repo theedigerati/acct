@@ -16,7 +16,7 @@ SECRET_KEY = config("SECRET_KEY", default="not-so-secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=".acc, acc", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=".acct, acct", cast=Csv())
 
 
 # Application definition
@@ -99,7 +99,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.parse(
-        config("DATABASE_URL", default="postgres://postgres:password@localhost:5432/acc"),
+        config("DATABASE_URL", default="postgres://postgres:password@localhost:5432/acct"),
         engine="django_tenants.postgresql_backend",
         conn_max_age=600,
         conn_health_checks=True,
@@ -164,7 +164,7 @@ MANAGER_USER_RESTRICTIONS = [
 
 # Multinants settings
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
-TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="acc")
+TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="acct")
 TENANT_MODEL = "organisation.Tenant"
 TENANT_DOMAIN_MODEL = "organisation.Domain"
 BASE_TENANT_SLUG = config("BASE_TENANT_SLUG", default="acme")
@@ -191,7 +191,7 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "acc",
+    "TITLE": "acct",
     "DESCRIPTION": "Double-entry accounting REST API.",
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
