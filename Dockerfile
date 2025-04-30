@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.12-slim-bullseye
+ARG PYTHON_VERSION=3.10-slim-bullseye
 
 FROM python:${PYTHON_VERSION}
 
@@ -11,18 +11,22 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /code
+RUN mkdir -p /app
 
-WORKDIR /code
+WORKDIR /app
 
 RUN pip install poetry
-COPY pyproject.toml poetry.lock /code/
+COPY pyproject.toml poetry.lock /app/
 RUN poetry config virtualenvs.create false
-RUN poetry install --only main --no-root --no-interaction
-COPY . /code
+RUN poetry install --no-root --no-interaction
+# RUN --mount=type=cache,mode=0755,target=/root/.cache/pypoetry poetry sync
 
-RUN chmod +x /code/init.sh
-# RUN python manage.py collectstatic --noinput
+RUN groupadd -r acct && useradd -r -g acct acct
+RUN chown -R acct:acct /app/
+COPY . /app
+
+RUN chmod +x /app/init.sh
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 

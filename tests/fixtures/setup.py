@@ -17,12 +17,11 @@ PUBLIC_EMAIL = settings.BASE_TENANT_OWNER_EMAIL
 TEST_USER_EMAIL = "test@localhost"
 DEFAULT_PASSWORD = "password"
 TEST_TENANT_SLUG = "test"
-TENANT_SUBFOLDER_PREFIX = getattr(settings, "TENANT_SUBFOLDER_PREFIX", None)
 
 
 @pytest.fixture()
 def client(test_user):
-    api_client = CustomAPIClient(subfolder_tenancy=True, SERVER_NAME=CLIENT_DOMAIN_NAME)
+    api_client = APIClient(SERVER_NAME=f"{TEST_TENANT_SLUG}.{CLIENT_DOMAIN_NAME}")
     url = reverse("jwt-login")
     res = api_client.post(url, {"email": test_user.email, "password": DEFAULT_PASSWORD})
     api_client.credentials(HTTP_AUTHORIZATION="Bearer " + res.data["access"])
@@ -51,14 +50,26 @@ def create_tenant_user(test_tenant):
 
 
 @pytest.fixture()
-def test_tenant(make_test_tenant):
-    make_test_tenant()
-    tenant = Tenant.objects.get(slug=TEST_TENANT_SLUG)
-    if not hasattr(tenant, "organisation"):
-        mixer.blend("organisation.Organisation", tenant=tenant)
-    acc_fact = AccountingFactory(tenant.schema_name)
-    acc_fact.generate_default_accounts()
-    return tenant
+def test_tenant(create_tenant):
+    return create_tenant(TEST_TENANT_SLUG)
+
+
+@pytest.fixture()
+def create_tenant():
+    _make_public_tenant()
+
+    def _create_tenant(slug=None):
+        assert slug is not None
+        with contextlib.suppress(ExistsError):
+            provision_tenant(tenant_name=slug, tenant_slug=slug, user_email=PUBLIC_EMAIL)
+        tenant = Tenant.objects.get(slug=slug)
+        if not hasattr(tenant, "organisation"):
+            mixer.blend("organisation.Organisation", tenant=tenant)
+        acc_fact = AccountingFactory(tenant.schema_name)
+        acc_fact.generate_default_accounts()
+        return tenant
+
+    return _create_tenant
 
 
 @pytest.fixture()
@@ -67,9 +78,7 @@ def make_test_tenant():
 
     def _make_test_tenant(slug=TEST_TENANT_SLUG):
         with contextlib.suppress(ExistsError):
-            provision_tenant(
-                tenant_name=slug, tenant_slug=slug, user_email=PUBLIC_EMAIL
-            )
+            provision_tenant(tenant_name=slug, tenant_slug=slug, user_email=PUBLIC_EMAIL)
 
     return _make_test_tenant
 
@@ -80,16 +89,3 @@ def _make_public_tenant():
     settings.ALLOWED_HOSTS += [f".{CLIENT_DOMAIN_NAME}"]
     with contextlib.suppress(ExistsError):
         create_public_tenant(CLIENT_DOMAIN_NAME, PUBLIC_EMAIL)
-
-
-class CustomAPIClient(APIClient):
-    def __init__(self, subfolder_tenancy=False, **kwargs):
-        self.subfolder_tenancy = subfolder_tenancy
-        super().__init__(**kwargs)
-
-    def request(self, **kwargs):
-        if self.subfolder_tenancy:
-            kwargs["PATH_INFO"] = (
-                f"/{TENANT_SUBFOLDER_PREFIX}/{TEST_TENANT_SLUG}" + kwargs["PATH_INFO"]
-            )
-        return super().request(**kwargs)

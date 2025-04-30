@@ -1,6 +1,6 @@
-## acc
+## Acct
 
-This is a simple accounting REST API. Manage invoices, bills, expenses, acccounting books & reports.
+Manage invoices, bills, expenses, payments, acccounting books & more.
 
 - 🧾 **Invoices & Clients** - Generate detailed invoices for clients.
 - 🔖 **Bills & Vendors** - Record bills received from vendors.
@@ -13,26 +13,56 @@ This is a simple accounting REST API. Manage invoices, bills, expenses, acccount
 
 ## Getting Started
 
-First, clone the repo
+This project uses Docker to simplify setup and development. To begin, ensure you have [Docker installed](https://docs.docker.com/get-started/get-docker/) on your machine.
 
-```
-git clone https://github.com/theedigerati/acc.git && cd acc
-```
+1. **Clone the Repository**
 
-Next, run
-
-```
-docker compose up -d
+```sh
+git clone https://github.com/theedigerati/acct.git && cd acct
 ```
 
-The application will now be avalaible at <http://localhost:8000> and API documentation at <http://localhost:8000/docs>
+2. **Apply Django migrations**
 
-For  development, run
+Run database migrations to set up the initial schema:
 
+```sh
+docker compose run --rm python manage.py migrate
 ```
-docker compose up --watch
+
+3. **Set Up Tenancy Data**
+
+This will initialize a default tenant, create a basic chart of accounts, and provision the system owner.
+
+```sh
+docker compose run --rm python manage.py setup_tenancy
+```
+> ✅ A superuser account is created automatically with:
+> **Email:** `owner@acct`
+> **Password:** `owner`
+
+4. **Start the Application**
+
+```sh
+docker compose up
 ```
 
-## Tenancy Setup
 
-After installation a default organisation(tenant) is created automatically and Chart of Accounts set up for it.
+## Access the application
+
+To support multi-tenancy, each tenant is available via a custom subdomain, for example: `tenant1.example.com`.
+
+### Local Development Setup
+
+On a typical local machine, accessing subdomains would require manually adding entries to `/etc/hosts`. To streamline this, we use:
+- [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) as a DNS resolver for a custom local domain with wildcard subdomain support.
+- [nginx](https://nginx.org/) as a reverse proxy to serve the application on port `80`.
+
+This setup allows seamless routing to tenant-specific domains without additional system configuration.
+
+### Accessing URLs
+
+- Public API - http://acct
+- Tenant API - http://acme.acct
+- OpenAPI Docs - http://acme.acct/docs
+
+Sub-domain slug can be edited for any organisation(tenant).

@@ -1,3 +1,4 @@
+import dj_database_url
 from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
@@ -15,7 +16,7 @@ SECRET_KEY = config("SECRET_KEY", default="not-so-secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv(), default=".localhost")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=".acct, acct", cast=Csv())
 
 
 # Application definition
@@ -60,8 +61,7 @@ TENANT_APPS = [
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
-    "django_tenants.middleware.TenantSubfolderMiddleware",
-    # "django_tenants.middleware.main.TenantMainMiddleware",
+    "django_tenants.middleware.main.TenantMainMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -96,16 +96,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django_tenants.postgresql_backend",
-        "NAME": config("DB_NAME", default="test_db"),
-        "USER": config("DB_USER", default="postgres"),
-        "PASSWORD": config("DB_PASSWORD", default="postgres"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": "5432",
-        "OPTIONS": {"sslmode": config("SSL_MODE", default="disable")},
-    }
+    "default": dj_database_url.parse(
+        config("DATABASE_URL", default="postgres://postgres:password@localhost:5432/acct"),
+        engine="django_tenants.postgresql_backend",
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=config("SSL_REQUIRE", default=False, cast=bool),
+    )
 }
 
 
@@ -165,12 +164,11 @@ MANAGER_USER_RESTRICTIONS = [
 
 # Multinants settings
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
-TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="localhost")
-TENANT_SUBFOLDER_PREFIX = "org"
+TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="acct")
 TENANT_MODEL = "organisation.Tenant"
 TENANT_DOMAIN_MODEL = "organisation.Domain"
 BASE_TENANT_SLUG = config("BASE_TENANT_SLUG", default="acme")
-BASE_TENANT_OWNER_EMAIL = config("BASE_TENANT_OWNER_EMAIL", default="meta@localhost")
+BASE_TENANT_OWNER_EMAIL = config("BASE_TENANT_OWNER_EMAIL", default="owner@acct")
 
 AUTHENTICATION_BACKENDS = ("tenant_users.permissions.backend.UserBackend",)
 
@@ -193,14 +191,13 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "acc",
+    "TITLE": "Acct",
     "DESCRIPTION": "Double-entry accounting REST API.",
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
     },
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
-    "SCHEMA_PATH_PREFIX_INSERT": f"/{TENANT_SUBFOLDER_PREFIX}/default",
 }
 
 PERMISSION_CATEGORIES = {

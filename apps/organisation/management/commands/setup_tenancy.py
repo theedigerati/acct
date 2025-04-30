@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import transaction
 from django.core.management.base import BaseCommand
-from apps.accounting.models import Account
 from apps.organisation.models import OrgAddress, Organisation, Tenant
 from apps.user.models import User
 from tenant_users.tenants.utils import create_public_tenant
@@ -45,14 +44,14 @@ class Command(BaseCommand):
     def setup_default_organisation(self, public_owner):
         if Organisation.objects.first() is None:
             self.stdout.write("creating default organisation...")
-            org_name = "default"
+            org_slug = "acme"
             provision_tenant(
-                tenant_name=org_name,
-                tenant_slug=org_name,
+                tenant_name=org_slug,
+                tenant_slug=org_slug,
                 user_email=public_owner,
                 is_staff=True,
             )
-            tenant = Tenant.objects.get(slug=org_name)
+            tenant = Tenant.objects.get(slug=org_slug)
             address = OrgAddress.objects.create(
                 line1="25 Rahman Str.",
                 line2="Off B Road",
@@ -62,7 +61,7 @@ class Command(BaseCommand):
                 country="Nigeria",
             )
             org = Organisation.objects.create(
-                name="Default Organisation",
+                name="Acme Inc.",
                 address=address,
                 tenant=tenant,
             )
