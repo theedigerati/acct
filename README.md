@@ -1,4 +1,6 @@
-## Acct
+<div align="center">
+  <h1>acct</h1>
+</div>
 
 Manage invoices, bills, expenses, payments, acccounting books & more.
 
@@ -15,13 +17,13 @@ Manage invoices, bills, expenses, payments, acccounting books & more.
 
 This project uses Docker to simplify setup and development. To begin, ensure you have [Docker installed](https://docs.docker.com/get-started/get-docker/) on your machine.
 
-1. **Clone the Repository**
+**1. Clone the Repository**
 
 ```sh
 git clone https://github.com/theedigerati/acct.git && cd acct
 ```
 
-2. **Apply Django migrations**
+**2. Apply Django Migrations**
 
 Run database migrations to set up the initial schema:
 
@@ -29,25 +31,25 @@ Run database migrations to set up the initial schema:
 docker compose run --rm python manage.py migrate
 ```
 
-3. **Set Up Tenancy Data**
+**3. Set Up Tenancy Data**
 
 This will initialize a default tenant, create a basic chart of accounts, and provision the system owner.
 
 ```sh
 docker compose run --rm python manage.py setup_tenancy
 ```
-> ✅ A superuser account is created automatically with:
-> **Email:** `owner@acct`
-> **Password:** `owner`
+> ✅ A superuser account is created automatically with:  
+> **Email:** `owner@acct`  
+> **Password:** `owner`  
 
-4. **Start the Application**
+**4. Start the Application**
 
 ```sh
 docker compose up
 ```
 
 
-## Access the application
+## Accessing the Application
 
 To support multi-tenancy, each tenant is available via a custom subdomain, for example: `tenant1.example.com`.
 
