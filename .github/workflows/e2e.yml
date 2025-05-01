@@ -1,0 +1,79 @@
+name: e2e suite
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**.py"
+      - Dockerfile
+      - "apps/**"
+      - "core/**"
+      - ".github/workflows/e2e.yml"
+      - pyproject.toml
+      - poetry.lock
+
+env:
+  DATABASE_URL: "postgres://acct:acct@postgres:5432/acct"
+  SECRET_KEY: ci-test
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-22.04
+    container: python:3.10
+    name: Run E2E tests
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: acct
+          POSTGRES_USER: acct
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get install -y libpq-dev
+
+      - name: Install and configure poetry
+        run: |
+          pip install poetry
+
+      - name: Cache the venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        run: |
+          poetry env use python3.10
+          poetry sync
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
+      - name: Add Python Virtual Environment to PATH
+        run: |
+          # Note: requires `poetry env use` to be ran, otherwise poetry
+          # may not be able to find which virtual environment is in use.
+          # Ticket: https://github.com/python-poetry/poetry/issues/7190
+          echo "$(poetry env info -p)"/bin >> $GITHUB_PATH
+
+      - name: Run E2E tests
+        run: |
+          pytest -m "e2e" --junit-xml=e2e-test-results.xml
+      - name: Surface failing tests
+        if: always()
+        uses: pmeier/pytest-results-action@main
+        with:
+          path: e2e-test-results.xml
+          summary: true
+          display-options: fEX
+          fail-on-empty: true
+          title: E2E core test results
