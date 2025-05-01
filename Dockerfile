@@ -25,7 +25,6 @@ RUN groupadd -r acct && useradd -r -g acct acct
 RUN chown -R acct:acct /app/
 COPY . /app
 
-RUN chmod +x /app/init.sh
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
