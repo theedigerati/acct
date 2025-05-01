@@ -85,4 +85,7 @@ max-complexity = 10
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
+markers = [
+    "e2e: mark test as end-to-end"
+]
 # filterwarnings = ["ignore::django.utils.deprecation.RemovedInDjango50Warning",]
