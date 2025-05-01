@@ -8,9 +8,7 @@ def belongs_to_organisation(request):
         try:
             return bool(request.user.tenant_perms)
         except ObjectDoesNotExist:
-            raise PermissionDenied(
-                "You do not have permission to access this organisation."
-            )
+            raise PermissionDenied("You do not have permission to access this organisation.")
     else:
         return False
 
@@ -27,7 +25,7 @@ class BelongsToOrganisation(BasePermission):
 
 class IsManagerOrMore(BasePermission):
     """
-    Allow access to users with access role of MANAGER, ADMIN or META
+    Allow access to users with access role of MANAGER, ADMIN or OWNER
     that satisty BelongsToOrganisation.
     """
 
@@ -40,7 +38,7 @@ class IsManagerOrMore(BasePermission):
 
 class IsAdmin(BasePermission):
     """
-    Allow access to users with access role ADMIN or META
+    Allow access to users with access role ADMIN or OWNER
     that satisty BelongsToOrganisation.
     """
 
@@ -51,15 +49,15 @@ class IsAdmin(BasePermission):
             return False
 
 
-class IsMeta(BasePermission):
+class IsOwner(BasePermission):
     """
-    Allow access to users with access role META
+    Allow access to users with access role OWNER
     that satisty BelongsToOrganisation.
     """
 
     def has_permission(self, request, view):
         if belongs_to_organisation(request):
-            return bool(request.user.is_meta)
+            return bool(request.user.is_owner)
         else:
             return False
 

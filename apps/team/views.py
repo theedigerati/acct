@@ -5,41 +5,39 @@ from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
 
 from apps.user.serializers import PermissionSerializer
-from .models import Department
+from .models import Team
 from .serializers import (
-    DepartmentMemberSerializer,
-    DepartmentSerializer,
-    UpdateDepartmentMembersSerializer,
+    TeamMemberSerializer,
+    TeamSerializer,
+    UpdateTeamMembersSerializer,
 )
 from core.permissions import BelongsToOrganisation, BaseModelPermissions
 
 
-class UpdateDepartmentAsHead(DjangoModelPermissions):
+class UpdateTeamAsHead(DjangoModelPermissions):
     """
-    Ensures that rquest user has the permission of a department head,
-    belongs to the department and is one the heads.
+    Ensures that rquest user has the permission of a team head,
+    belongs to the team and is one the heads.
     """
 
     perms_map = {
-        "GET": ["%(app_label)s.custom_change_department_as_head"],
-        "OPTIONS": ["%(app_label)s.custom_change_department_as_head"],
-        "HEAD": ["%(app_label)s.custom_change_department_as_head"],
-        "POST": ["%(app_label)s.custom_change_department_as_head"],
-        "PUT": ["%(app_label)s.custom_change_department_as_head"],
-        "PATCH": ["%(app_label)s.custom_change_department_as_head"],
+        "GET": ["%(app_label)s.custom_change_team_as_head"],
+        "OPTIONS": ["%(app_label)s.custom_change_team_as_head"],
+        "HEAD": ["%(app_label)s.custom_change_team_as_head"],
+        "POST": ["%(app_label)s.custom_change_team_as_head"],
+        "PUT": ["%(app_label)s.custom_change_team_as_head"],
+        "PATCH": ["%(app_label)s.custom_change_team_as_head"],
     }
 
     def has_object_permission(self, request, view, obj):
-        request_user_is_member = obj.user_set.filter(
-            profile__id=request.user.id
-        ).exists()
+        request_user_is_member = obj.user_set.filter(profile__id=request.user.id).exists()
         request_user_is_head = obj.heads.filter(id=request.user.id).exists()
         return request_user_is_member and request_user_is_head
 
 
-class DepartmentViewSet(ModelViewSet):
-    queryset = Department.objects.all()
-    serializer_class = DepartmentSerializer
+class TeamViewSet(ModelViewSet):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
 
     def get_permissions(self):
         if self.action in [
@@ -52,7 +50,7 @@ class DepartmentViewSet(ModelViewSet):
         ]:
             self.permission_classes = [
                 BelongsToOrganisation,
-                UpdateDepartmentAsHead | BaseModelPermissions,
+                UpdateTeamAsHead | BaseModelPermissions,
             ]
         if self.action in ["list", "retrieve"]:
             self.permission_classes = [BelongsToOrganisation, DjangoModelPermissions]
@@ -60,25 +58,18 @@ class DepartmentViewSet(ModelViewSet):
 
     def check_object_permissions(self, request, obj):
         """
-        Only mgt. users can update dept. permissions.
-        i.e only users with the 'change_department' permission.
+        Only mgt. users can update team. permissions.
+        i.e only users with the 'change_team' permission.
         """
         is_update_request = self.action == "update" or self.action == "partial_update"
         if is_update_request and "permissions" in request.data:
             # check that it is an update
-            dept_permissions_data = request.data.get("permissions", [])
-            current_dept_permissions = obj.permissions.values_list("id", flat=True)
-            is_updating_permissions = set(dept_permissions_data) != set(
-                current_dept_permissions
-            )
+            team_permissions_data = request.data.get("permissions", [])
+            current_team_permissions = obj.permissions.values_list("id", flat=True)
+            is_updating_permissions = set(team_permissions_data) != set(current_team_permissions)
 
-            if (
-                is_updating_permissions
-                and request.user.has_perm("department.change_department") is False
-            ):
-                raise PermissionDenied(
-                    "You're not permitted to update this department's permissions."
-                )
+            if is_updating_permissions and request.user.has_perm("team.change_team") is False:
+                raise PermissionDenied("You're not permitted to update this team's permissions.")
 
         return super().check_object_permissions(request, obj)
 
@@ -104,12 +95,12 @@ class DepartmentViewSet(ModelViewSet):
         instance = self.get_object()
         members = instance.user_set.values_list("profile__id", flat=True)
         non_members = request.tenant.user_set.exclude(id__in=members)
-        serializer = DepartmentMemberSerializer(non_members, many=True)
+        serializer = TeamMemberSerializer(non_members, many=True)
         return Response(serializer.data)
 
     def _update_members(self, request, action_type):
         instance = self.get_object()
-        ser = UpdateDepartmentMembersSerializer(
+        ser = UpdateTeamMembersSerializer(
             instance, data=request.data, context={"action": action_type}
         )
         if ser.is_valid(raise_exception=True):
@@ -117,4 +108,4 @@ class DepartmentViewSet(ModelViewSet):
             return response
 
 
-# TODO: add view action to deactivate department.
+# TODO: add view action to deactivate team.

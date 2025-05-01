@@ -37,9 +37,7 @@ def test_unsafe_create_user(client, test_tenant, test_user, user_data):
 
 
 @pytest.mark.django_db
-def test_retrieve_user(
-    client, test_user, user_object_without_org, user_object_with_org
-):
+def test_retrieve_user(client, test_user, user_object_without_org, user_object_with_org):
     """
     Test USER retrieve action where they belong to the
     same organisation and where they don't.
@@ -146,14 +144,14 @@ def test_list_user_permissions(client, test_user, user_object_with_org):
 
 
 @pytest.mark.django_db
-def test_permissions_source_of_truth(client, test_user, dept_object):
+def test_permissions_source_of_truth(client, test_user, team_object):
     url = reverse("permission-source-of-truth")
 
     # no permisions
     res = client.get(url)
     assert res.status_code == 403
 
-    test_user.add_permissions("change_user", "change_department")
+    test_user.add_permissions("change_user", "change_team")
     res = client.get(url)
     assert res.status_code == 200
     assert res.data.keys() == settings.PERMISSION_CATEGORIES.keys()
@@ -163,11 +161,7 @@ def test_permissions_source_of_truth(client, test_user, dept_object):
     res = client.get(sot_user_url)
     assert res.status_code == 200
     user_model_permissions = next(
-        (
-            category_dict["user"]
-            for category_dict in res.data.values()
-            if "user" in category_dict
-        ),
+        (category_dict["user"] for category_dict in res.data.values() if "user" in category_dict),
         None,
     )
     assert user_model_permissions
@@ -177,10 +171,10 @@ def test_permissions_source_of_truth(client, test_user, dept_object):
         if perm_data["perm"]["codename"] == "change_user"
     )
 
-    # source of truth for department
-    dept_object.add_permissions("change_invoice")
-    sot_dept_url = url + "?department=" + str(dept_object.id)
-    res = client.get(sot_dept_url)
+    # source of truth for team
+    team_object.add_permissions("change_invoice")
+    sot_team_url = url + "?team=" + str(team_object.id)
+    res = client.get(sot_team_url)
     assert res.status_code == 200
     invoice_model_permissions = next(
         (
@@ -197,8 +191,8 @@ def test_permissions_source_of_truth(client, test_user, dept_object):
         if perm_data["perm"]["codename"] == "change_invoice"
     )
 
-    # source of truth for user in department
-    dept_object.add_members([test_user])
+    # source of truth for user in team
+    team_object.add_members([test_user])
     res = client.get(sot_user_url)
     invoice_model_permissions = next(
         (

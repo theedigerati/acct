@@ -46,7 +46,7 @@ TENANT_APPS = [
     "django.contrib.sessions",
     "tenant_users.permissions",
     # internal apps
-    "apps.department",
+    "apps.team",
     "apps.inventory.item",
     "apps.tax",
     "apps.accounting",
@@ -201,7 +201,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 PERMISSION_CATEGORIES = {
-    "organisation": ["user", "department", "organisation"],
+    "organisation": ["user", "team", "organisation"],
     "accounting": ["tax", "account", "account sub type"],
     "sales": [
         "invoice",

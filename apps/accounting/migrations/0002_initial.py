@@ -11,47 +11,41 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("organisation", "0001_initial"),
+        ("accounting", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="tenant",
-            name="owner",
+            model_name="journalentry",
+            name="created_by",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
             ),
         ),
         migrations.AddField(
-            model_name="organisation",
-            name="address",
+            model_name="account",
+            name="parent",
             field=models.ForeignKey(
+                blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name="organisations",
-                to="organisation.orgaddress",
-            ),
-        ),
-        migrations.AddField(
-            model_name="organisation",
-            name="tenant",
-            field=models.OneToOneField(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="organisation",
-                to="organisation.tenant",
+                related_name="sub_accounts",
+                to="accounting.account",
             ),
         ),
         migrations.AddField(
-            model_name="domain",
-            name="tenant",
+            model_name="account",
+            name="sub_type",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="domains",
-                to="organisation.tenant",
+                to="accounting.accountsubtype",
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name="organisation",
-            unique_together={("name", "branch")},
+        migrations.AddIndex(
+            model_name="transaction",
+            index=models.Index(
+                fields=["ref_type", "ref_id", "date"],
+                name="accounting__ref_typ_6a27b8_idx",
+            ),
         ),
     ]

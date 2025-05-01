@@ -77,13 +77,11 @@ class Organisation(models.Model):
     def users(self):
         return self.tenant.user_set.count()
 
-    def add_users(self, users: list = [], is_meta_users=False):
+    def add_users(self, users: list = [], is_superuser=False):
         res = {"added": 0, "exist": 0}
         for user in users:
             try:
-                self.tenant.add_user(
-                    user, is_superuser=is_meta_users, is_staff=is_meta_users
-                )
+                self.tenant.add_user(user, is_superuser=is_superuser, is_staff=is_superuser)
                 user.assign_default_permissions()
                 res["added"] += 1
             except ExistsError:
@@ -111,6 +109,7 @@ class Organisation(models.Model):
         # on a request cycle, this method should be ran async
         # e.g using celery, coz `provision_tenant` will run migrations
         from tenant_users.tenants.tasks import provision_tenant
+
         tenant_slug = self.get_tenant_slug()
         provision_tenant(
             tenant_name=self.name,
@@ -133,18 +132,16 @@ class Organisation(models.Model):
         tenant_slug = self.get_tenant_slug()
         if self.tenant.slug == tenant_slug:
             return
-        Tenant.objects.filter(id=self.tenant.id).update(
-            name=self.name, slug=tenant_slug
-        )
+        Tenant.objects.filter(id=self.tenant.id).update(name=self.name, slug=tenant_slug)
         if hasattr(settings, "TENANT_SUBFOLDER_PREFIX"):
             tenant_domain = tenant_slug
         else:
             tenant_domain = f"{tenant_slug}.{settings.TENANT_USERS_DOMAIN}"
         Domain.objects.filter(tenant=self.tenant).update(domain=tenant_domain)
 
-    def _add_all_meta_users(self):
-        meta_users = User.objects.filter(role=User.META)
-        self.add_users(list(meta_users), is_meta_users=True)
+    def _add_all_owners(self):
+        owners = User.objects.filter(role=User.OWNER)
+        self.add_users(list(owners), is_superuser=True)
 
 
 class Domain(DomainMixin):
