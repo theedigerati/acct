@@ -2,6 +2,8 @@
   <h1>acct</h1>
 </div>
 
+[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+
 Manage invoices, bills, expenses, payments, acccounting books & more.
 
 - 🧾 **Invoices & Clients** - Generate detailed invoices for clients.
