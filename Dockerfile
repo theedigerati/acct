@@ -29,5 +29,5 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", ":8000", "--workers", "2", "core.wsgi"]
+CMD ["gunicorn", "--bind", ":8000", "--workers", "2", "acct.wsgi"]
 

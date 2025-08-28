@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from django_tenants.utils import schema_context
 from apps.team.models import Team
-from core.permissions import BelongsToOrganisation
+from acct.permissions import BelongsToOrganisation
 from .models import User
 from .serializers import (
     UserSerializer,

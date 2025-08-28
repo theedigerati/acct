@@ -11,7 +11,7 @@ from .serializers import (
     TeamSerializer,
     UpdateTeamMembersSerializer,
 )
-from core.permissions import BelongsToOrganisation, BaseModelPermissions
+from acct.permissions import BelongsToOrganisation, BaseModelPermissions
 
 
 class UpdateTeamAsHead(DjangoModelPermissions):

@@ -6,13 +6,11 @@ from apps.accounting.serializers import AccountShallowSerializer
 from apps.tax.serializers import TaxSerializer
 from apps.purchase.vendor.models import Vendor
 from apps.purchase.vendor.serializers import VendorShallowSerializer
-from core.serializers.fields import PrimaryKey_To_ObjectField
+from acct.serializers.fields import PrimaryKey_To_ObjectField
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
-    amount_incl_tax = serializers.DecimalField(
-        max_digits=12, decimal_places=2, read_only=True
-    )
+    amount_incl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     vendor = PrimaryKey_To_ObjectField(
         queryset=Vendor.objects,
         object_serializer=VendorShallowSerializer,

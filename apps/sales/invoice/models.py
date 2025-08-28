@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.apps import apps
 from .managers import InvoiceManager, PaymentReceivedManager
-from core.utils import get_next_number
+from acct.utils import get_next_number
 
 
 def get_invoice_next_number():
@@ -32,13 +32,9 @@ class Invoice(models.Model):
 
     # This is a unique invoice number e.g INV-000012,
     NUMBER_PREFIX = "INV"
-    number = models.CharField(
-        max_length=16, unique=True, default=get_invoice_next_number
-    )
+    number = models.CharField(max_length=16, unique=True, default=get_invoice_next_number)
 
-    client = models.ForeignKey(
-        "client.Client", related_name="invoices", on_delete=models.PROTECT
-    )
+    client = models.ForeignKey("client.Client", related_name="invoices", on_delete=models.PROTECT)
     issued_date = models.DateField(default=date.today)
     due_date = models.DateField(blank=True, null=True)
     salesperson = models.ForeignKey(
@@ -52,9 +48,7 @@ class Invoice(models.Model):
     # If discount_as_percent is True, discount_value
     # is used in calculation as a percentage
     discount_as_percent = models.BooleanField(blank=True, null=True)
-    discount_value = models.DecimalField(
-        decimal_places=2, max_digits=10, blank=True, null=True
-    )
+    discount_value = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True)
 
     notes = models.TextField(blank=True)
     terms = models.TextField(blank=True)

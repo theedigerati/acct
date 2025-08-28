@@ -13,15 +13,13 @@ from apps.sales.invoice.models import (
     PaymentReceived,
 )
 from apps.user.models import User
-from core.serializers.fields import PrimaryKey_To_ObjectField
-from core.serializers.utils import CreateUpdateRelationMixin
+from acct.serializers.fields import PrimaryKey_To_ObjectField
+from acct.serializers.utils import CreateUpdateRelationMixin
 
 
 class InvoiceLineSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
-    item = PrimaryKey_To_ObjectField(
-        queryset=Item.objects, object_serializer=SaleItemSerializer
-    )
+    item = PrimaryKey_To_ObjectField(queryset=Item.objects, object_serializer=SaleItemSerializer)
     taxes = PrimaryKey_To_ObjectField(
         queryset=Tax.objects,
         object_serializer=TaxSerializer,
@@ -36,9 +34,7 @@ class InvoiceLineSerializer(serializers.ModelSerializer):
 
 class BaseInvoiceSerializer(CreateUpdateRelationMixin, serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=InvoiceStatus.choices, read_only=True)
-    client = PrimaryKey_To_ObjectField(
-        queryset=Client.objects, object_serializer=ClientSerializer
-    )
+    client = PrimaryKey_To_ObjectField(queryset=Client.objects, object_serializer=ClientSerializer)
     salesperson = PrimaryKey_To_ObjectField(
         allow_null=True,
         required=False,
@@ -49,12 +45,8 @@ class BaseInvoiceSerializer(CreateUpdateRelationMixin, serializers.ModelSerializ
     total_amount = serializers.DecimalField(
         source="total_incl_tax", max_digits=12, decimal_places=2, read_only=True
     )
-    amount_due = serializers.DecimalField(
-        max_digits=12, decimal_places=2, read_only=True
-    )
-    amount_paid = serializers.DecimalField(
-        max_digits=12, decimal_places=2, read_only=True
-    )
+    amount_due = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    amount_paid = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
 
     class Meta:
         model = Invoice

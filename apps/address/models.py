@@ -1,5 +1,5 @@
 from django.db import models
-from core.abstract_models import AbstractAddress
+from acct.abstract_models import AbstractAddress
 
 
 class Address(AbstractAddress):

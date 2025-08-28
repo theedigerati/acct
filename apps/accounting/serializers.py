@@ -10,8 +10,8 @@ from apps.accounting.models import (
 )
 from apps.user.models import User
 from apps.user.serializers import UserAsRelationSerializer
-from core.serializers.fields import PrimaryKey_To_ObjectField
-from core.serializers.utils import CreateUpdateRelationMixin
+from acct.serializers.fields import PrimaryKey_To_ObjectField
+from acct.serializers.utils import CreateUpdateRelationMixin
 
 
 class AccountSubTypeSerializer(serializers.ModelSerializer):
@@ -63,9 +63,7 @@ class AccountSiblingsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
-        repr["sub_types"] = AccountSubTypeSerializer(
-            instance.sibling_sub_types, many=True
-        ).data
+        repr["sub_types"] = AccountSubTypeSerializer(instance.sibling_sub_types, many=True).data
         repr["accounts"] = AccountSerializer(instance.sibling_accounts, many=True).data
         return repr
 

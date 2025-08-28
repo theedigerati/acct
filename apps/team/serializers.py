@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission
 from django.conf import settings
 from rest_framework import serializers
 from .models import Team
-from core.serializers.fields import PrimaryKey_To_ObjectField
+from acct.serializers.fields import PrimaryKey_To_ObjectField
 from apps.user.models import User
 
 

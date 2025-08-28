@@ -11,7 +11,7 @@ from tenant_users.tenants.models import (
 from django_tenants.models import DomainMixin
 from apps.accounting.factory import AccountingFactory
 from apps.user.models import User
-from core.abstract_models import AbstractAddress
+from acct.abstract_models import AbstractAddress
 
 
 class Tenant(TenantBase):

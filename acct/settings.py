@@ -71,8 +71,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "core.urls"
-PUBLIC_SCHEMA_URLCONF = "core.urls_public"
+ROOT_URLCONF = "acct.urls"
+PUBLIC_SCHEMA_URLCONF = "acct.urls_public"
 
 TEMPLATES = [
     {
@@ -90,7 +90,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "core.wsgi.application"
+WSGI_APPLICATION = "acct.wsgi.application"
 
 
 # Database
@@ -177,8 +177,8 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "core.permissions.BelongsToOrganisation",
-        "core.permissions.BaseModelPermissions",
+        "acct.permissions.BelongsToOrganisation",
+        "acct.permissions.BaseModelPermissions",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "COERCE_DECIMAL_TO_STRING": False,

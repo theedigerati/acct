@@ -7,8 +7,8 @@ from apps.inventory.item.serializers import SaleItemSerializer
 from apps.purchase.vendor.models import Vendor
 from apps.purchase.vendor.serializers import VendorSerializer
 from apps.purchase.bill.models import Bill, BillLine, BillStatus, PaymentMade
-from core.serializers.fields import PrimaryKey_To_ObjectField
-from core.serializers.utils import CreateUpdateRelationMixin
+from acct.serializers.fields import PrimaryKey_To_ObjectField
+from acct.serializers.utils import CreateUpdateRelationMixin
 
 
 class BillLineSerializer(serializers.ModelSerializer):
@@ -33,19 +33,13 @@ class BillLineSerializer(serializers.ModelSerializer):
 
 class BaseBillSerializer(CreateUpdateRelationMixin, serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=BillStatus.choices, read_only=True)
-    vendor = PrimaryKey_To_ObjectField(
-        queryset=Vendor.objects, object_serializer=VendorSerializer
-    )
+    vendor = PrimaryKey_To_ObjectField(queryset=Vendor.objects, object_serializer=VendorSerializer)
     total_items = serializers.IntegerField(read_only=True)
     total_amount = serializers.DecimalField(
         source="total_incl_tax", max_digits=12, decimal_places=2, read_only=True
     )
-    amount_due = serializers.DecimalField(
-        max_digits=12, decimal_places=2, read_only=True
-    )
-    amount_paid = serializers.DecimalField(
-        max_digits=12, decimal_places=2, read_only=True
-    )
+    amount_due = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    amount_paid = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
 
     class Meta:
         model = Bill

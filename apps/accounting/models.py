@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import ValidationError
 
-from core.utils import get_next_number
+from acct.utils import get_next_number
 from .managers import ActiveAccountManager, TransactionManager
 
 
@@ -148,9 +148,7 @@ class JournalEntry(models.Model):
 
     # This is a unique journal number e.g JNL-00012,
     NUMBER_PREFIX = "JNL"
-    number = models.CharField(
-        max_length=16, unique=True, default=get_journal_next_number
-    )
+    number = models.CharField(max_length=16, unique=True, default=get_journal_next_number)
 
     is_draft = models.BooleanField(default=True)
     created_by = models.ForeignKey("user.User", on_delete=models.CASCADE)
@@ -179,9 +177,7 @@ class JournalEntry(models.Model):
 
 
 class JournalEntryLine(models.Model):
-    journal = models.ForeignKey(
-        JournalEntry, related_name="lines", on_delete=models.CASCADE
-    )
+    journal = models.ForeignKey(JournalEntry, related_name="lines", on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     type = models.CharField(max_length=6, choices=TransactionType.choices)

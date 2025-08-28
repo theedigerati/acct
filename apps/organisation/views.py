@@ -4,7 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
-from core.permissions import BelongsToOrganisation
+from acct.permissions import BelongsToOrganisation
 from .models import Organisation
 from .serializers import (
     OrganisationSerializer,

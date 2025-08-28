@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.apps import apps
 from apps.purchase.bill.managers import BillManager, PaymentMadeManager
-from core.utils import get_next_number
+from acct.utils import get_next_number
 
 
 def get_bill_next_number():
@@ -35,18 +35,14 @@ class Bill(models.Model):
     NUMBER_PREFIX = "B"
     number = models.CharField(max_length=16, unique=True, default=get_bill_next_number)
 
-    vendor = models.ForeignKey(
-        "vendor.Vendor", related_name="bills", on_delete=models.PROTECT
-    )
+    vendor = models.ForeignKey("vendor.Vendor", related_name="bills", on_delete=models.PROTECT)
     bill_date = models.DateField(default=date.today)
     due_date = models.DateField(blank=True, null=True)
 
     # If discount_as_percent is True, discount_value
     # is used in calculation as a percentage
     discount_as_percent = models.BooleanField(blank=True, null=True)
-    discount_value = models.DecimalField(
-        decimal_places=2, max_digits=10, blank=True, null=True
-    )
+    discount_value = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True)
 
     notes = models.TextField(blank=True)
     terms = models.TextField(blank=True)
@@ -165,9 +161,7 @@ class BillLine(models.Model):
         related_name="lines",
         on_delete=models.CASCADE,
     )
-    item = models.ForeignKey(
-        "item.Item", blank=True, null=True, on_delete=models.PROTECT
-    )
+    item = models.ForeignKey("item.Item", blank=True, null=True, on_delete=models.PROTECT)
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
