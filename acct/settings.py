@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "django_celery_beat",
     # Local apps
+    "acct.core",
     "acct.people",
     # External apps
     "django_measurement",
