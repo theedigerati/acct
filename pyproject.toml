@@ -1,86 +1,172 @@
-[tool.poetry]
+[project]
 name = "acct"
 version = "0.1.0"
-description = "Double-entry Accounting REST API"
-authors = ["Posi Adedeji <posiadedeji05@gmail.com>"]
+description = "Double-entry Accounting GraphQL API"
+authors = [{name = "Posi Adedeji", email = "<posiadedeji05@gmail.com>"}]
+requires-python = ">=3.12,<3.13"
 readme = "README.md"
-package-mode = false
+dependencies = [
+    "asgiref>=3.7.2,<4",
+    "babel>=2.8,<2.18",
+    "dj-database-url>=2,<3",
+    "django[bcrypt]~=5.2",
+    "django-cache-url>=3.1.2,<4",
+    "django-celery-beat>=2.8.1,<3",
+    "django-filter~=24.3",
+    "django-measurement~=3.0",
+    "django-mptt>=0,<1",
+    "django-phonenumber-field>=4,<9",
+    "django-stubs-ext>=5.1.3,<6",
+    "redis>=5.0.1,<6",
+    "uvicorn[standard]>=0.32.0,<0.33",
+    "psycopg[binary]>=3.2.9,<4",
+    "pydantic>=2.11.0,<3",
+    "pydantic-core>=2.33.0,<3",
+    "celery[redis, sqs]>=4.4.5,<6.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "~3.10"
-django = "^4.2"
-python-decouple = "^3.8"
-psycopg = {version = "^3.1.8", extras = ["binary"]}
-djangorestframework = "^3.15.2"
-djangorestframework-simplejwt = "^5.4.0"
-django-tenants = "^3.7.0"
-django-tenant-users = "^1.5.0"
-drf-spectacular = "^0.28.0"
-django-filter = "^24.3"
-celery = {version = ">=4.45,<6.0.0", extras = ["redis"]}
-django-celery-results = "^2.5.1"
-gunicorn = "^23.0.0"
-dj-database-url = "^2.3.0"
+[project.urls]
+Repository = "https://github.com/theedigerati/acct"
 
+[dependency-groups]
+dev = [
+    "coverage~=7.6",
+    "deptry>=0.23.0,<0.24",
+    "django-extensions~=4.1",
+    "django-stubs[compatible-mypy]>=5.1.3,<6",
+    "fakeredis~=2.26",
+    "freezegun>=1,<2",
+    "mypy-extensions>=1.1.0,<2",
+    "pytest>=8.3.2,<9",
+    "pytest-asyncio>=1.0.0,<2",
+    "pytest-celery>=1.0.1,<2",
+    "pytest-cov>=6.0.0,<7",
+    "pytest-django==4.9.0",
+    "pytest-django-queries>=1.2,<1.3",
+    "pytest-memray>=1.5.0,<2",
+    "pytest-mock>=3.6.1,<4",
+    "pytest-recording>=0.13.0,<0.14",
+    "pytest-socket>=0.7.0,<0.8",
+    "pytest-xdist>=3.0.2,<4",
+    "pywatchman>=2.0.0,<3",
+    "ruff>=0.12.2,<0.13",
+    "types-certifi>=2021.10.8,<2022",
+    "types-freezegun>=1.1.7,<2",
+    "types-mock>=5.0.0.5,<6",
+    "types-setuptools>=80.9.0.20250529,<81",
+    "types-python-dateutil>=2.9.0,<3",
+    "types-redis>=4.6.0,<5",
+    "types-requests>=2.32.4,<3",
+    "types-six>=1.17.0,<2",
+    "vcrpy>=7.0.0,<8",
+    "poethepoet>=0.32.2,<0.33",
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.9.4"
-pytest = "^8.3.4"
-coverage = "^7.6.10"
-mixer = "^7.2.2"
-pytest-django = "^4.9.0"
-pytest-celery = "=0.0.0"
+[tool.poe]
+envfile = ".env"
+
+[tool.uv]
+environments = [
+  "platform_python_implementation != 'PyPy'"
+]
+package = false
 
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.django-stubs]
+django_settings_module = "acct.settings"
+
+[tool.mypy]
+allow_untyped_globals = true
+allow_redefinition = true
+check_untyped_defs = true
+ignore_missing_imports = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+show_traceback = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+plugins = [
+  "mypy_django_plugin.main",
+  "pydantic.mypy"
+]
+
+exclude = [
+  "tests/"
+]
+
+[[tool.mypy.overrides]]
+module = ["acct.*.migrations.*"]
+ignore_errors = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
 
 [tool.ruff]
-# run 'ruff linter' to see meanings
-extend-select = ["C4", "C90", "DJ", "I", "SIM", "TCH", "UP"]
-ignore = ["E402", "F405", "B905", "I001", "N818", "S101"]
+target-version = "py312"
 
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F"]
-unfixable = []
-show-fixes = true
-
-# Exclude a variety of commonly ignored directories.
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".env",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "env",
+[tool.ruff.lint]
+select = [
+  "ASYNC",
+  "B",
+  "C4",
+  "D",
+  "DTZ",
+  "E",
+  "F",
+  "FURB",
+  "G",
+  "I",
+  "ISC001",
+  "ISC002",
+  "LOG",
+  "PGH",
+  "PIE",
+  "PT",
+  "PYI",
+  "RET",
+  "T20",
+  "UP",
+  "W"
 ]
-per-file-ignores = {}
-line-length = 99
-target-version = "py37"
+ignore = [
+  "B009", # Do not call getattr with a constant value
+  "B010", # Do not call setattr with a constant value
+  "B023", # Function definition does not bind loop variable
+  "D100", # Missing docstring in public module
+  "D101", # Missing docstring in public class
+  "D102", # Missing docstring in public method
+  "D103", # Missing docstring in public function
+  "D104", # Missing docstring in public package
+  "D105", # Missing docstring in magic method
+  "D106", # Missing docstring in public nested class
+  "D107", # Missing docstring in __init__
+  "D202", # No blank lines allowed after function docstring
+  "D203", # 1 blank line required before class docstring
+  "D206", # Docstring should be indented with spaces, not tabs
+  "D213", # Multi-line docstring summary should start at the second line
+  "D407", # Missing dashed underline after section
+  "E501", # Line too long
+  "PT019", # Fixture without value is injected as parameter, use @pytest.mark.usefixtures instead
+  "PYI041", # Use `float` instead of `int | float`
+  "RET504", # Unnecessary assignment before return statement
+  "UP046" # Parameter syntax for generic classes; not supported by mypy: https://github.com/python/mypy/issues/18507
+]
 
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
 
-[tool.ruff.mccabe]
-# Unlike Flake8, default to a complexity level of 10.
-max-complexity = 10
+[tool.ruff.lint.isort]
+known-first-party = ["acct"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "acct.settings"
