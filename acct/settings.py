@@ -1,7 +1,7 @@
-import dj_database_url
 from pathlib import Path
-from decouple import config, Csv
-from datetime import timedelta
+
+import dj_database_url
+from decouple import Csv, config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,49 +19,26 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=".acct, acct", cast=Csv())
 
 
-# Application definition
-
-SHARED_APPS = [
-    "django_tenants",  # 3rd party
-    "django.contrib.admin",
-    "django.contrib.auth",
+INSTALLED_APPS = [
+    # External apps that need to go before django's
+    # "storages",
+    # Django modules
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
+    "django.contrib.sites",
     "django.contrib.staticfiles",
-    # 3rd party apps
-    "rest_framework",
-    "tenant_users.permissions",
-    "tenant_users.tenants",
-    "django_celery_results",
-    "drf_spectacular",
-    # internal apps
-    "apps.user",
-    "apps.organisation",
+    "django.contrib.postgres",
+    "django_celery_beat",
+    # Local apps
+    "acct.people",
+    # External apps
+    "django_measurement",
+    "mptt",
+    "django_countries",
+    "django_filters",
+    "phonenumber_field",
 ]
-
-TENANT_APPS = [
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "tenant_users.permissions",
-    # internal apps
-    "apps.team",
-    "apps.inventory.item",
-    "apps.tax",
-    "apps.accounting",
-    "apps.address",
-    "apps.sales.client",
-    "apps.sales.invoice",
-    "apps.purchase.vendor",
-    "apps.purchase.bill",
-    "apps.purchase.expense",
-]
-
-INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -72,7 +49,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "acct.urls"
-PUBLIC_SCHEMA_URLCONF = "acct.urls_public"
 
 TEMPLATES = [
     {
@@ -96,14 +72,16 @@ WSGI_APPLICATION = "acct.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+DB_CONN_MAX_AGE = config("DB_CONN_MAX_AGE", default=0, cast=int)
+DB_SSL_REQUIRE = config("DB_SSL_REQUIRE", default=False, cast=bool)
+DB_URL = config("DB_URL", default="postgres://postgres:password@localhost:5432/acct")
 
 DATABASES = {
     "default": dj_database_url.parse(
-        config("DATABASE_URL", default="postgres://postgres:password@localhost:5432/acct"),
-        engine="django_tenants.postgresql_backend",
-        conn_max_age=600,
+        DB_URL,
+        conn_max_age=DB_CONN_MAX_AGE,
         conn_health_checks=True,
-        ssl_require=config("SSL_REQUIRE", default=False, cast=bool),
+        ssl_require=DB_SSL_REQUIRE,
     )
 }
 
@@ -162,59 +140,8 @@ MANAGER_USER_RESTRICTIONS = [
     "view_all_organisations",
 ]
 
-# Multinants settings
-DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
-TENANT_USERS_DOMAIN = config("APP_DOMAIN_NAME", default="acct")
-TENANT_MODEL = "organisation.Tenant"
-TENANT_DOMAIN_MODEL = "organisation.Domain"
-BASE_TENANT_SLUG = config("BASE_TENANT_SLUG", default="acme")
-BASE_TENANT_OWNER_EMAIL = config("BASE_TENANT_OWNER_EMAIL", default="owner@acct")
 
-AUTHENTICATION_BACKENDS = ("tenant_users.permissions.backend.UserBackend",)
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "acct.permissions.BelongsToOrganisation",
-        "acct.permissions.BaseModelPermissions",
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "COERCE_DECIMAL_TO_STRING": False,
-    "SEARCH_PARAM": "q",
-}
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=2),
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Acct",
-    "DESCRIPTION": "Double-entry accounting REST API.",
-    "SWAGGER_UI_SETTINGS": {
-        "persistAuthorization": True,
-    },
-    "SERVE_INCLUDE_SCHEMA": False,
-    "COMPONENT_SPLIT_REQUEST": True,
-}
-
-PERMISSION_CATEGORIES = {
-    "organisation": ["user", "team", "organisation"],
-    "accounting": ["tax", "account", "account sub type"],
-    "sales": [
-        "invoice",
-        "client",
-        "payment received",
-    ],
-    "purchase": [
-        "bill",
-        "vendor",
-        "payment made",
-        "expense",
-    ],
-}
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
 CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/")
 CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="django-db")
