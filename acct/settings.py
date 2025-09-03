@@ -3,6 +3,8 @@ from pathlib import Path
 import dj_database_url
 from decouple import Csv, config
 
+from acct.core.languages import LANGUAGES as CORE_LANGUAGES
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -110,6 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
+LANGUAGES: list[tuple[str, str]] = CORE_LANGUAGES
 
 TIME_ZONE = "UTC"
 
