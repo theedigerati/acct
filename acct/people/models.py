@@ -82,6 +82,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ("email",)
+        indexes = [models.Index(fields=["email"], name="user_email_idx")]
 
     def __str__(self):
         # Override the default __str__ of AbstractUser that returns USERNAME_FIELD,
@@ -102,6 +103,11 @@ class UserTenantPermissions(models.Model):
     tenant = models.ForeignKey(Tenant, related_name="users", on_delete=models.CASCADE)
     permissions = models.ManyToManyField(Permission, blank=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "tenant"], name="uniq_tenant_user")
+        ]
+
 
 class Team(models.Model):
     """A team is a tenant-based group of users.
@@ -119,3 +125,10 @@ class Team(models.Model):
     admins = models.ManyToManyField(User, blank=True)
     permissions = models.ManyToManyField(Permission, blank=True)
     is_public = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "tenant"], name="uniq_tenant_team_name"
+            )
+        ]
