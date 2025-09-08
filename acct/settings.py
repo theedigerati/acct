@@ -1,7 +1,10 @@
+import warnings
 from pathlib import Path
+from urllib.parse import urlparse
 
 import dj_database_url
 from decouple import Csv, config
+from django.core.management.utils import get_random_secret_key
 
 from acct.core.languages import LANGUAGES as CORE_LANGUAGES
 
@@ -19,6 +22,32 @@ SECRET_KEY = config("SECRET_KEY", default="not-so-secret")
 DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=".acct, acct", cast=Csv())
+
+if not SECRET_KEY and DEBUG:
+    warnings.warn(
+        "SECRET_KEY not configured, using a random temporary key.", stacklevel=1
+    )
+    SECRET_KEY = get_random_secret_key()
+
+RSA_PRIVATE_KEY = config("RSA_PRIVATE_KEY", None)
+RSA_PRIVATE_PASSWORD = config("RSA_PRIVATE_PASSWORD", None)
+JWT_MANAGER_PATH = config("JWT_MANAGER_PATH", "acct.core.auth.manager.JWTManager")
+
+ENABLE_SSL: bool = config("ENABLE_SSL", False)
+
+# URL on which Acct is hosted (e.g., https://api.example.com/).
+# This has precedence over ENABLE_SSL.
+PUBLIC_URL: str | None = config("PUBLIC_URL")
+if PUBLIC_URL:
+    if config("ENABLE_SSL") is not None:
+        warnings.warn(
+            "ENABLE_SSL is ignored on URL generation if PUBLIC_URL is set.",
+            stacklevel=1,
+        )
+    ENABLE_SSL = urlparse(PUBLIC_URL).scheme.lower() == "https"
+
+if ENABLE_SSL:
+    SECURE_SSL_REDIRECT = not DEBUG
 
 
 INSTALLED_APPS = [
