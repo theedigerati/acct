@@ -1,27 +1,46 @@
+import os
 import warnings
 from pathlib import Path
 from urllib.parse import urlparse
 
 import dj_database_url
-from decouple import Csv, config
 from django.core.management.utils import get_random_secret_key
+from django.core.validators import URLValidator
 
 from acct.core.languages import LANGUAGES as CORE_LANGUAGES
+
+
+def get_list(text):
+    return [item.strip() for item in text.split(",") if item]
+
+
+def get_bool_from_env(name, default_value):
+    """Retrieve and convert an environment variable to a boolean object.
+
+    Accepted values are `true` (case-insensitive) and `1`, any other value resolves to `False`.
+    """
+    value = os.environ.get(name)
+    if value is None:
+        return default_value
+    return value.lower() in ("true", "1")
+
+
+def get_url_from_env(name, *, schemes=None) -> str | None:
+    if name in os.environ:
+        value = os.environ[name]
+        message = f"{value} is an invalid value for {name}"
+        URLValidator(schemes=schemes, message=message)(value)
+        return value
+    return None
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = get_bool_from_env("DEBUG", True)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY", default="not-so-secret")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=True, cast=bool)
-
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=".acct, acct", cast=Csv())
+ALLOWED_HOSTS = get_list(os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1"))
 
 if not SECRET_KEY and DEBUG:
     warnings.warn(
@@ -29,17 +48,19 @@ if not SECRET_KEY and DEBUG:
     )
     SECRET_KEY = get_random_secret_key()
 
-RSA_PRIVATE_KEY = config("RSA_PRIVATE_KEY", None)
-RSA_PRIVATE_PASSWORD = config("RSA_PRIVATE_PASSWORD", None)
-JWT_MANAGER_PATH = config("JWT_MANAGER_PATH", "acct.core.auth.manager.JWTManager")
+RSA_PRIVATE_KEY = os.environ.get("RSA_PRIVATE_KEY", None)
+RSA_PRIVATE_PASSWORD = os.environ.get("RSA_PRIVATE_PASSWORD", None)
+JWT_MANAGER_PATH = os.environ.get(
+    "JWT_MANAGER_PATH", "acct.core.auth.manager.JWTManager"
+)
 
-ENABLE_SSL: bool = config("ENABLE_SSL", False)
+ENABLE_SSL: bool = get_bool_from_env("ENABLE_SSL", False)
 
 # URL on which Acct is hosted (e.g., https://api.example.com/).
 # This has precedence over ENABLE_SSL.
-PUBLIC_URL: str | None = config("PUBLIC_URL")
+PUBLIC_URL: str | None = get_url_from_env("PUBLIC_URL", schemes=["http", "https"])
 if PUBLIC_URL:
-    if config("ENABLE_SSL") is not None:
+    if os.environ.get("ENABLE_SSL") is not None:
         warnings.warn(
             "ENABLE_SSL is ignored on URL generation if PUBLIC_URL is set.",
             stacklevel=1,
@@ -104,9 +125,9 @@ WSGI_APPLICATION = "acct.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DB_CONN_MAX_AGE = config("DB_CONN_MAX_AGE", default=0, cast=int)
-DB_SSL_REQUIRE = config("DB_SSL_REQUIRE", default=False, cast=bool)
-DB_URL = config("DB_URL", default="postgres://postgres:password@localhost:5432/acct")
+DB_CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", 0))
+DB_SSL_REQUIRE = get_bool_from_env("DB_SSL_REQUIRE", False)
+DB_URL = os.environ.get("DB_URL", "postgres://postgres:password@localhost:5432/acct")
 
 DATABASES = {
     "default": dj_database_url.parse(
@@ -176,5 +197,5 @@ MANAGER_USER_RESTRICTIONS = [
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
-CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/")
-CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="django-db")
+CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
