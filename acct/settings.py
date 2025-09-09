@@ -195,7 +195,9 @@ MANAGER_USER_RESTRICTIONS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+AUTHENTICATION_BACKENDS = ["acct.people.auth.backends.JWTBackend"]
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
+
+JWT_EXPIRE = True

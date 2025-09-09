@@ -1,6 +1,14 @@
+import jwt
 from django.contrib.auth.models import Permission
 
-from acct.people.models import UserTenantPermissions
+from acct.people.auth.utils import (
+    JWT_ACCESS_TYPE,
+    JWT_THIRDPARTY_ACCESS_TYPE,
+    get_token_from_request,
+    is_acct_token,
+    jwt_decode,
+)
+from acct.people.models import User, UserTenantPermissions
 
 
 class BaseBackend:
@@ -76,3 +84,29 @@ class TenantBackend(BaseBackend):
 
     def has_perm(self, user_obj, perm, tenant):
         return user_obj.is_active and super().has_perm(user_obj, perm, tenant=tenant)
+
+
+class JWTBackend(TenantBackend):
+    def authenticate(self, request=None, **kwargs):
+        return load_user_from_request(request)
+
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(email=user_id, is_active=True)
+        except User.DoesNotExist:
+            return None
+
+
+def load_user_from_request(request):
+    if request is None:
+        return
+    jwt_token = get_token_from_request(request)
+    if not jwt_token or not is_acct_token(jwt_token):
+        return
+    payload = jwt_decode(jwt_token)
+
+    jwt_type = payload.get("type")
+    if jwt_type not in [JWT_ACCESS_TYPE, JWT_THIRDPARTY_ACCESS_TYPE]:
+        raise jwt.InvalidTokenError(
+            "Invalid token. Create new one by using tokenCreate mutation."
+        )
