@@ -1,6 +1,7 @@
 import jwt
 from django.contrib.auth.models import Permission
 
+from acct.graphql.people.dataloaders import UserByEmailLoader
 from acct.people.auth.utils import (
     JWT_ACCESS_TYPE,
     JWT_THIRDPARTY_ACCESS_TYPE,
@@ -99,10 +100,10 @@ class JWTBackend(TenantBackend):
 
 def load_user_from_request(request):
     if request is None:
-        return
+        return None
     jwt_token = get_token_from_request(request)
     if not jwt_token or not is_acct_token(jwt_token):
-        return
+        return None
     payload = jwt_decode(jwt_token)
 
     jwt_type = payload.get("type")
@@ -110,3 +111,20 @@ def load_user_from_request(request):
         raise jwt.InvalidTokenError(
             "Invalid token. Create new one by using tokenCreate mutation."
         )
+
+    user = UserByEmailLoader(request).load(payload["email"]).get()
+    user_jwt_token = payload.get("token")
+    if not user_jwt_token:
+        raise jwt.InvalidTokenError(
+            "Invalid token. Create new one by using tokenCreate mutation."
+        )
+    if not user:
+        raise jwt.InvalidTokenError(
+            "Invalid token. User does not exist or is inactive."
+        )
+    if user.jwt_token_key != user_jwt_token:
+        raise jwt.InvalidTokenError(
+            "Invalid token. Create new one by using tokenCreate mutation."
+        )
+
+    return user
