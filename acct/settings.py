@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     # Local apps
     "acct.core",
     "acct.people",
+    "acct.graphql",
     # External apps
     "django_measurement",
     "mptt",
