@@ -26,6 +26,7 @@ dependencies = [
     "pyjwt>=2.10.1,<3",
     "authlib>=1.6.0,<2",
     "cryptography>=44.0.2,<45",
+    "promise~=2.3",
 ]
 
 [project.urls]
